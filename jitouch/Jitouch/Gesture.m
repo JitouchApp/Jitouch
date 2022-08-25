@@ -30,6 +30,7 @@
 #define py normalized.pos.y
 #define HS(a)  ((a * 7907 + 7883) % 4493)
 #define CFSafeRelease(a) if (a)CFRelease(a);
+#define MAX3(a,b,c) ( MAX(a, MAX(b,c)) )
 
 #define MIDDLEBUTTONDOWN 1
 #define LEFTBUTTONDOWN 2
@@ -94,7 +95,9 @@ static int moveResizeFlag, shouldExitMoveResize;
 
 // distance between two fingers to suppress left click in next/prev tab gesture
 static float twoFingersDistance = 100.0f;
-
+static BOOL trackpadHasGesture;
+static NSCondition *trackpadGestureCondition;
+static NSDate *lastGestureDate;
 
 static int trigger = 0;
 
@@ -1413,11 +1416,6 @@ static void gestureTrackpadOneFixOneTap(const Finger *data, int nFingers, double
     if (nFingers == 0) {
         restTime = -1;
     }
-    if (nFingers == 2) {
-        twoFingersDistance = lenSqrF(data, 0, 1);
-    } else {
-        twoFingersDistance = 100;
-    }
 
     if (step == 0 && nFingers == 1) {
         step = 1;
@@ -1840,6 +1838,21 @@ static void gestureTrackpadAutoScroll(const Finger *data, int nFingers, double t
 
 
 static int trackpadCallback(int device, Finger *data, int nFingers, double timestamp, int frame) {
+    trackpadNFingers = nFingers;
+    if (nFingers == 2) {
+        twoFingersDistance = lenSqrF(data, 0, 1);
+        trackpadHasGesture = twoFingersDistance < 0.3f;
+    } else if (nFingers == 3) {
+        twoFingersDistance = MAX3(lenSqrF(data, 0, 1), lenSqrF(data, 1, 2), lenSqrF(data, 0, 2));
+        trackpadHasGesture = twoFingersDistance < 0.3f;
+    } else {
+        trackpadHasGesture = FALSE;
+        twoFingersDistance = 100;
+    }
+    if (trackpadHasGesture) {
+        lastGestureDate = [NSDate date];
+        [trackpadGestureCondition signal];
+    }
 
     static int thumbId = -1;
     Finger *dataUnnormalized = (Finger *)malloc(sizeof(Finger) * nFingers);
@@ -1920,8 +1933,6 @@ static int trackpadCallback(int device, Finger *data, int nFingers, double times
         if (enHanded)
             for (int i = 0; i < nFingers; i++)
                 data[i].px = 1 - data[i].px;
-
-        trackpadNFingers = nFingers;
 
         if (!gestureTrackpadMoveResize(data, nFingers, timestamp)) {
             if (!isTrackpadRecognizing) {
@@ -2678,12 +2689,26 @@ static void magicTrackpadRemoved(void* refCon, io_iterator_t iterator) {
 #pragma mark - CGEventCallback
 
 static CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
-    if (trackpadNFingers == 2 && twoFingersDistance < 0.3f && type == kCGEventLeftMouseDown) {
-        if (logLevel >= LOG_LEVEL_DEBUG)
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{NSLog(@"Suppressed Mouse%d with %d fingers %f", type, trackpadNFingers, twoFingersDistance);});
-        return NULL;
-    } else if (logLevel >= LOG_LEVEL_DEBUG && (type == kCGEventLeftMouseDown || type == kCGEventLeftMouseUp)) {
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{NSLog(@"Did not suppress Mouse%d with %d fingers %f", type, trackpadNFingers, twoFingersDistance);});
+    if (type == kCGEventLeftMouseDown) {
+        double timeInterval = fabs([lastGestureDate timeIntervalSinceNow]);
+        bool suppress = trackpadHasGesture || timeInterval < 0.05;
+        if (!suppress) {
+            if ([trackpadGestureCondition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:1e-3]] == YES) {
+                timeInterval = fabs([lastGestureDate timeIntervalSinceNow]);
+                suppress = trackpadHasGesture || timeInterval < 0.05;
+            }
+            else if (logLevel >= LOG_LEVEL_DEBUG) {
+                dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{NSLog(@"WaitUntilGesture timed out 0.001");});
+            }
+        }
+        if (suppress) {
+            if (logLevel >= LOG_LEVEL_DEBUG)
+                dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{NSLog(@"Suppressed MouseDown with %d fingers d=%f t=%f", trackpadNFingers, twoFingersDistance, timeInterval);});
+            return NULL;
+        } else if (logLevel >= LOG_LEVEL_DEBUG)
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{NSLog(@"Did not suppress MouseDown with %d fingers d=%f t=%f", trackpadNFingers, twoFingersDistance, timeInterval);});
+    } else if (logLevel >= LOG_LEVEL_DEBUG && type == kCGEventLeftMouseUp) {
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{NSLog(@"Did not suppress MouseUp with %d fingers d=%f", trackpadNFingers, twoFingersDistance);});
     }
 
     if (type == kCGEventLeftMouseDown || type == kCGEventRightMouseDown) {
@@ -2935,6 +2960,9 @@ CFMutableArrayRef deviceList;
         me = self;
 
         systemWideElement = AXUIElementCreateSystemWide();
+
+        trackpadGestureCondition = [[NSCondition alloc] init];
+        lastGestureDate = [NSDate date];
 
         // Character Recognizer
         initNormPdf();
