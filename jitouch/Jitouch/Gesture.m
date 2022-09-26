@@ -98,6 +98,10 @@ static BOOL trackpadHasTwoFingers;
 static NSDate *lastTwoFingerDate;
 static NSDate *lastThreeFingerDate;
 
+// suppress four-finger tap if pinky-to-index or index-to-pinky gestures were triggered
+static BOOL trackpadTab4Triggered = FALSE;
+static int trackpadTab4Step[2] = {0, 0};
+
 static int trigger = 0;
 
 static int disableHorizontalScroll;
@@ -1017,6 +1021,7 @@ static void gestureTrackpadTab4(const Finger *data, int nFingers, double timesta
         } else if (nFingers > 4)
             step[dir] = 0;
         else if (nFingers == 0) {
+            trackpadTab4Triggered = TRUE;
             if (dir == 1) {
                 dispatchCommand(@"Pinky-To-Index", TRACKPAD);
             } else{
@@ -1046,6 +1051,7 @@ static void gestureTrackpadTab4(const Finger *data, int nFingers, double timesta
             step[dir] = 0;
         lastNFingers[dir] = nFingers;
     }
+    trackpadTab4Step[dir] = step[dir];
 }
 
 // TODO: clicking (not just tapping) should return to the normal mode
@@ -1418,6 +1424,10 @@ static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, doubl
     static double fing[4][2];
     if (nFingers > 4)
         step = 2;
+    else if (trackpadTab4Triggered) {
+        step = 0;
+        sttime = -1;
+    }
     else if (step == 0 && nFingers == 4) {
         if (sttime == -1) {
             sttime = timestamp;
@@ -1431,11 +1441,19 @@ static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, doubl
     } else if (step == 1) {
         if (nFingers <= 1) {
             if (sttime != -1 && timestamp-sttime <= clickSpeed) {
-                if (!trackpadClicked)
+                if (trackpadTab4Step[0] == 4 || trackpadTab4Step[1] == 4) {
+                    // should dispatch, but only if TrackpadTab4 is not triggered
+                    step = 3;
+                }
+                else if (!trackpadClicked) {
                     dispatchCommand(@"Four-Finger Tap", TRACKPAD);
+                    step = 0;
+                    sttime = -1;
+                }
+            } else {
+                step = 0;
+                sttime = -1;
             }
-            step = 0;
-            sttime = -1;
         } else if (nFingers == 4) {
             if (lenSqr(fing[0][0], fing[0][1], data[0].px, data[0].py) > 0.001 ||
                lenSqr(fing[1][0], fing[1][1], data[1].px, data[1].py) > 0.001 ||
@@ -1447,6 +1465,10 @@ static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, doubl
     } else if (step == 2 && nFingers <= 1) {
         step = 0;
         sttime  = -1;
+    } else if (step == 3) {
+        dispatchCommand(@"Four-Finger Tap", TRACKPAD);
+        step = 0;
+        sttime = -1;
     }
 }
 
@@ -1988,13 +2010,14 @@ static int trackpadCallback(int device, Finger *data, int nFingers, double times
                 gestureTrackpadOneFixOneTap(data, nFingers, timestamp);
 
                 gestureTrackpadThreeFingerTap(data, nFingers, timestamp);
-                gestureTrackpadFourFingerTap(data, nFingers, timestamp);
 
                 gestureTrackpadOneFixTwoSlide(data, nFingers, timestamp);
                 gestureTrackpadChangeSpace(data, nFingers);
 
                 gestureTrackpadTab4(data, nFingers, timestamp, 0);
                 gestureTrackpadTab4(data, nFingers, timestamp, 1);
+                gestureTrackpadFourFingerTap(data, nFingers, timestamp);
+                trackpadTab4Triggered = FALSE;
 
                 gestureTrackpadSwipeThreeFingers(data, nFingers);
                 gestureTrackpadSwipeFourFingers(data, nFingers);
