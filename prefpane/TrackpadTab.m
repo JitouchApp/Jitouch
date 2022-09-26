@@ -70,6 +70,7 @@
                    @"Three-Swipe-Down",
                    @"Three-Swipe-Left", //TODO: should tell the user that it may intefere with the OS's gestures
                    @"Three-Swipe-Right",
+                   @"Four-Finger Tap",
                    @"Four-Finger Click",
                    @"Four-Swipe-Up",
                    @"Four-Swipe-Down",

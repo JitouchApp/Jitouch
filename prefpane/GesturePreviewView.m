@@ -234,6 +234,21 @@ static void setFGx(FingerGesture *out, float x1, float y1, float x2, float y2, f
 
 }
 
+- (void)createFourFingerTap {
+    hg.n = 8;
+    hg.t = 2.5*2;
+    float s[2] = {0, 0};
+    setFG(&hg.fg[0], s[0]+0.29, s[1]+0.5, s[0]+0.29, s[1]+0.5, 0.25, 0.4);
+    setFG(&hg.fg[1], s[0]+0.43, s[1]+0.53, s[0]+0.43, s[1]+0.53, 0.25, 0.4);
+    setFG(&hg.fg[2], s[0]+0.57, s[1]+0.51, s[0]+0.57, s[1]+0.51, 0.25, 0.4);
+    setFG(&hg.fg[3], s[0]+0.71, s[1]+0.48, s[0]+0.71, s[1]+0.48, 0.25, 0.4);
+
+    setFG(&hg.fg[4], s[0]+0.29, s[1]+0.5, s[0]+0.29, s[1]+0.5, 1, 1.9);
+    setFG(&hg.fg[5], s[0]+0.43, s[1]+0.53, s[0]+0.43, s[1]+0.53, 1.5, 1.65);
+    setFG(&hg.fg[6], s[0]+0.57, s[1]+0.51, s[0]+0.57, s[1]+0.51, 1.5, 1.65);
+    setFG(&hg.fg[7], s[0]+0.71, s[1]+0.48, s[0]+0.71, s[1]+0.48, 1.5, 1.65);
+}
+
 - (void)createFourFingerClick {
     hg.n = 8;
     hg.t = 0.7*2;
@@ -1038,6 +1053,8 @@ static void setFGx(FingerGesture *out, float x1, float y1, float x2, float y2, f
             [self createThreeFingerPinchIn]; //TODO:
         } else if ([gesture isEqualToString:@"Three-Finger Pinch-Out"]) {
             [self createThreeFingerPinchOut]; //TODO:
+        } else if ([gesture isEqualToString:@"Four-Finger Tap"]) {
+            [self createFourFingerTap];
         } else if ([gesture isEqualToString:@"Four-Finger Click"]) {
             [self createFourFingerClick];
         } else if ([gesture isEqualToString:@"Index-Fix Two-Tap"]) {

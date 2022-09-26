@@ -1412,6 +1412,62 @@ static void gestureTrackpadThreeFingerTap(const Finger *data, int nFingers, doub
 }
 
 
+static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, double timestamp) {
+    static double sttime = -1;
+    static int step = 0;
+    static double fing[4][2];
+    static int idf[4];
+    if (nFingers > 4)
+        step = 2;
+    else if (step == 0 && nFingers == 4) {
+        if (sttime == -1) {
+            sttime = timestamp;
+            step = 1;
+            trackpadClicked = 0;
+            for (int i = 0; i < 4; i++) {
+                fing[i][0] = data[i].px;
+                fing[i][1] = data[i].py;
+            }
+            // sort idf according to data[i].px + data[i].py
+            for (int i = 0; i < 4; i++)
+                idf[i] = i;
+            int i = 1, j = 1, swapvar = 0;
+            while (i < 4) {
+                j = i;
+                while (j > 0 && data[j-1].px + data[j-1].py > data[j].px + data[j].py) {
+                    swapvar = idf[j-1];
+                    idf[j-1] = idf[j];
+                    idf[j] = swapvar;
+                    j--;
+                }
+                i++;
+            }
+            for (int i = 0; i < 4; i++)
+                idf[i] = data[idf[i]].identifier;
+        }
+    } else if (step == 1) {
+        if (nFingers <= 1) {
+            if (sttime != -1 && timestamp-sttime <= clickSpeed) {
+                if (!trackpadClicked)
+                    dispatchCommand(@"Four-Finger Tap", TRACKPAD);
+            }
+            step = 0;
+            sttime = -1;
+        } else if (nFingers == 4) {
+            if (lenSqr(fing[0][0], fing[0][1], data[0].px, data[0].py) > 0.001 ||
+               lenSqr(fing[1][0], fing[1][1], data[1].px, data[1].py) > 0.001 ||
+               lenSqr(fing[2][0], fing[2][1], data[2].px, data[2].py) > 0.001 ||
+               lenSqr(fing[3][0], fing[3][1], data[3].px, data[3].py) > 0.001 ) {
+                step = 2;
+            }
+        }
+    } else if (step == 2 && nFingers <= 1) {
+        step = 0;
+        sttime  = -1;
+    }
+}
+
+
 static void gestureTrackpadOneFixOneTap(const Finger *data, int nFingers, double timestamp) {
     static double sttime = -1;
     static float fing[2][2];
@@ -1949,6 +2005,7 @@ static int trackpadCallback(int device, Finger *data, int nFingers, double times
                 gestureTrackpadOneFixOneTap(data, nFingers, timestamp);
 
                 gestureTrackpadThreeFingerTap(data, nFingers, timestamp);
+                gestureTrackpadFourFingerTap(data, nFingers, timestamp);
 
                 gestureTrackpadOneFixTwoSlide(data, nFingers, timestamp);
                 gestureTrackpadChangeSpace(data, nFingers);
