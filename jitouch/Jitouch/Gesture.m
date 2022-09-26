@@ -101,6 +101,7 @@ static NSDate *lastThreeFingerDate;
 // suppress four-finger tap if pinky-to-index or index-to-pinky gestures were triggered
 static BOOL trackpadTab4Triggered = FALSE;
 static int trackpadTab4Step[2] = {0, 0};
+static BOOL fourFingerTapTriggered = FALSE;
 
 static int trigger = 0;
 
@@ -997,6 +998,8 @@ static void gestureTrackpadTab4(const Finger *data, int nFingers, double timesta
     static float avgX[2], avgY[2];
     float avgX2, avgY2;
     static int step[2];
+    if (fourFingerTapTriggered)
+        step[dir] = 0;
     if (step[dir] == 0) {
         if (nFingers == 1) {
             sttime[dir] = timestamp;
@@ -1422,6 +1425,8 @@ static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, doubl
     static double sttime = -1;
     static int step = 0;
     static double fing[4][2];
+    static double fourFingerTapTime;
+    fourFingerTapTriggered = FALSE;
     if (nFingers > 4)
         step = 2;
     else if (trackpadTab4Triggered) {
@@ -1442,7 +1447,8 @@ static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, doubl
         if (nFingers <= 1) {
             if (sttime != -1 && timestamp-sttime <= clickSpeed) {
                 if (trackpadTab4Step[0] == 4 || trackpadTab4Step[1] == 4) {
-                    // should dispatch, but only if TrackpadTab4 is not triggered
+                    // dispatch only if TrackpadTab4 is not triggered from the same gesture
+                    fourFingerTapTime = timestamp;
                     step = 3;
                 }
                 else if (!trackpadClicked) {
@@ -1466,9 +1472,14 @@ static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, doubl
         step = 0;
         sttime  = -1;
     } else if (step == 3) {
-        dispatchCommand(@"Four-Finger Tap", TRACKPAD);
-        step = 0;
-        sttime = -1;
+        if ((trackpadTab4Step[0] != 4 && trackpadTab4Step[1] != 4) ||
+            timestamp-fourFingerTapTime > clickSpeed/2) {
+            if (!trackpadClicked)
+                dispatchCommand(@"Four-Finger Tap", TRACKPAD);
+            fourFingerTapTriggered = TRUE;
+            step = 0;
+            sttime = -1;
+        }
     }
 }
 
