@@ -1057,6 +1057,70 @@ static void gestureTrackpadTab4(const Finger *data, int nFingers, double timesta
     trackpadTab4Step[dir] = step[dir];
 }
 
+
+static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, double timestamp) {
+    static double sttime = -1;
+    static int step = 0;
+    static double fing[4][2];
+    static double fourFingerTapTime;
+    fourFingerTapTriggered = FALSE;
+    if (nFingers > 4)
+        step = 2;
+    else if (trackpadTab4Triggered) {
+        step = 0;
+        sttime = -1;
+    }
+    else if (step == 0 && nFingers == 4) {
+        if (sttime == -1) {
+            sttime = timestamp;
+            step = 1;
+            trackpadClicked = 0;
+            for (int i = 0; i < 4; i++) {
+                fing[i][0] = data[i].px;
+                fing[i][1] = data[i].py;
+            }
+        }
+    } else if (step == 1) {
+        if (nFingers <= 1) {
+            if (sttime != -1 && timestamp-sttime <= clickSpeed) {
+                if (trackpadTab4Step[0] == 4 || trackpadTab4Step[1] == 4) {
+                    // dispatch only if TrackpadTab4 is not triggered from the same gesture
+                    fourFingerTapTime = timestamp;
+                    step = 3;
+                }
+                else if (!trackpadClicked) {
+                    dispatchCommand(@"Four-Finger Tap", TRACKPAD);
+                    step = 0;
+                    sttime = -1;
+                }
+            } else {
+                step = 0;
+                sttime = -1;
+            }
+        } else if (nFingers == 4) {
+            if (lenSqr(fing[0][0], fing[0][1], data[0].px, data[0].py) > 0.001 ||
+               lenSqr(fing[1][0], fing[1][1], data[1].px, data[1].py) > 0.001 ||
+               lenSqr(fing[2][0], fing[2][1], data[2].px, data[2].py) > 0.001 ||
+               lenSqr(fing[3][0], fing[3][1], data[3].px, data[3].py) > 0.001 ) {
+                step = 2;
+            }
+        }
+    } else if (step == 2 && nFingers <= 1) {
+        step = 0;
+        sttime  = -1;
+    } else if (step == 3) {
+        if ((trackpadTab4Step[0] != 4 && trackpadTab4Step[1] != 4) ||
+            timestamp-fourFingerTapTime > clickSpeed/2) {
+            if (!trackpadClicked)
+                dispatchCommand(@"Four-Finger Tap", TRACKPAD);
+            fourFingerTapTriggered = TRUE;
+            step = 0;
+            sttime = -1;
+        }
+    }
+}
+
+
 // TODO: clicking (not just tapping) should return to the normal mode
 static int gestureTrackpadMoveResize(const Finger *data, int nFingers, double timestamp) {
     static int step = 0, step2, min;
@@ -1417,69 +1481,6 @@ static void gestureTrackpadThreeFingerTap(const Finger *data, int nFingers, doub
     } else if (step == 2 && nFingers <= 1) {
         step = 0;
         sttime  = -1;
-    }
-}
-
-
-static void gestureTrackpadFourFingerTap(const Finger *data, int nFingers, double timestamp) {
-    static double sttime = -1;
-    static int step = 0;
-    static double fing[4][2];
-    static double fourFingerTapTime;
-    fourFingerTapTriggered = FALSE;
-    if (nFingers > 4)
-        step = 2;
-    else if (trackpadTab4Triggered) {
-        step = 0;
-        sttime = -1;
-    }
-    else if (step == 0 && nFingers == 4) {
-        if (sttime == -1) {
-            sttime = timestamp;
-            step = 1;
-            trackpadClicked = 0;
-            for (int i = 0; i < 4; i++) {
-                fing[i][0] = data[i].px;
-                fing[i][1] = data[i].py;
-            }
-        }
-    } else if (step == 1) {
-        if (nFingers <= 1) {
-            if (sttime != -1 && timestamp-sttime <= clickSpeed) {
-                if (trackpadTab4Step[0] == 4 || trackpadTab4Step[1] == 4) {
-                    // dispatch only if TrackpadTab4 is not triggered from the same gesture
-                    fourFingerTapTime = timestamp;
-                    step = 3;
-                }
-                else if (!trackpadClicked) {
-                    dispatchCommand(@"Four-Finger Tap", TRACKPAD);
-                    step = 0;
-                    sttime = -1;
-                }
-            } else {
-                step = 0;
-                sttime = -1;
-            }
-        } else if (nFingers == 4) {
-            if (lenSqr(fing[0][0], fing[0][1], data[0].px, data[0].py) > 0.001 ||
-               lenSqr(fing[1][0], fing[1][1], data[1].px, data[1].py) > 0.001 ||
-               lenSqr(fing[2][0], fing[2][1], data[2].px, data[2].py) > 0.001 ||
-               lenSqr(fing[3][0], fing[3][1], data[3].px, data[3].py) > 0.001 ) {
-                step = 2;
-            }
-        }
-    } else if (step == 2 && nFingers <= 1) {
-        step = 0;
-        sttime  = -1;
-    } else if (step == 3) {
-        if ((trackpadTab4Step[0] != 4 && trackpadTab4Step[1] != 4) ||
-            timestamp-fourFingerTapTime > clickSpeed/2) {
-            if (!trackpadClicked)
-                dispatchCommand(@"Four-Finger Tap", TRACKPAD);
-            fourFingerTapTriggered = TRUE;
-            step = 0;
-            sttime = -1;
-        }
     }
 }
 
