@@ -125,7 +125,7 @@ static BOOL recreatingEventTap;
 
 static int quickTabSwitching;
 
-static int middleClickFlag, magicMouseThreeFingerFlag;
+static int middleClickFlag, magicMouseThreeFingerFlag, trackpadThreeFingerFlag;
 static int trackpadNFingers, trackpadClicked;
 static int autoScrollFlag;
 static int moveResizeFlag, shouldExitMoveResize;
@@ -218,6 +218,7 @@ static bool familyIsMagicTrackpad(int familyID) {
 }
 
 static void turnOffTrackpad() {
+    trackpadThreeFingerFlag = 0;
     trackpadNFingers = 0;
 }
 
@@ -2126,6 +2127,8 @@ static int trackpadCallback(MTDeviceRef device, Finger *data, int nFingers, doub
 
         if (!gestureTrackpadMoveResize(data, nFingers, timestamp)) {
             if (!isTrackpadRecognizing) {
+                trackpadThreeFingerFlag = (nFingers == 3);
+
                 gestureTrackpadAutoScroll(data, nFingers, timestamp);
 
                 gestureTrackpadOneFixOneTap(data, nFingers, timestamp);
@@ -3032,7 +3035,7 @@ static CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEve
         }
 
     } else if (type == kCGEventScrollWheel) {
-        if (magicMouseThreeFingerFlag || isTrackpadRecognizing)
+        if (trackpadThreeFingerFlag || magicMouseThreeFingerFlag || isTrackpadRecognizing)
             return NULL;
         else if (autoScrollFlag) {
             int64_t sc = CGEventGetIntegerValueField(event, kCGScrollWheelEventDeltaAxis1);
