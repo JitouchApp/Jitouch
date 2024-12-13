@@ -683,12 +683,45 @@ static void doCommand(NSString *gesture, int device) {
 
             if ([command isEqualToString:@"-"]) {
 
+            } else if ([command isEqualToString:@"Fill"]) {
+                [keyUtil simulateKey:@"F" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+            } else if ([command isEqualToString:@"Return to Previous Size"]) {
+                [keyUtil simulateKey:@"R" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+            }  else if ([command isEqualToString:@"Center"]) {
+                [keyUtil simulateKey:@"C" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Left"]) {
+//                [keyUtil simulateKey:@"←" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Right"]) {
+//                [keyUtil simulateKey:@"→" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Top"]) {
+//                [keyUtil simulateKey:@"↑" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Bottom"]) {
+//                [keyUtil simulateKey:@"↓" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            }  else if ([command isEqualToString:@"Left & Right"]) {
+//                [keyUtil simulateKey:@"←" ShftDown:YES CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Right & Left"]) {
+//                [keyUtil simulateKey:@"→" ShftDown:YES CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Top & Bottom"]) {
+//                [keyUtil simulateKey:@"↑" ShftDown:YES CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
+//            } else if ([command isEqualToString:@"Bottom & Top"]) {
+//                [keyUtil simulateKey:@"↓" ShftDown:YES CtrlDown:YES AltDown:NO CmdDown:NO FnDown:YES];
+//                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Next Tab"]) {
-                [keyUtil simulateKey:@"Tab" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO];
-                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"Tab" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:NO FnDown:NO];
+                //[keyUtil simulateKey:@"]" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Previous Tab"]) {
-                [keyUtil simulateKey:@"Tab" ShftDown:YES CtrlDown:YES AltDown:NO CmdDown:NO];
-                //[keyUtil simulateKey:@"[" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"Tab" ShftDown:YES CtrlDown:YES AltDown:NO CmdDown:NO FnDown:NO];
+                //[keyUtil simulateKey:@"[" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Open Link in New Tab"]) {
                 CGEventRef ourEvent = CGEventCreate(NULL);
                 CGPoint ourLoc = CGEventGetLocation(ourEvent);
@@ -710,23 +743,23 @@ static void doCommand(NSString *gesture, int device) {
                 if (device != CHARRECOGNITION)
                     tmpRef = activateWindowAtPosition(x, y);
                 if ([application isEqualToString:@"Terminal"]) {
-                    [keyUtil simulateKey:@"F" ShftDown:NO CtrlDown:NO AltDown:YES CmdDown:YES];
+                    [keyUtil simulateKey:@"F" ShftDown:NO CtrlDown:NO AltDown:YES CmdDown:YES FnDown:NO];
                 } else if ([application isEqualToString:@"Finder"]) {
                 } else {
-                    [keyUtil simulateKey:@"F" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"F" ShftDown:NO CtrlDown:YES AltDown:NO CmdDown:YES FnDown:NO];
                 }
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Open Recently Closed Tab"]) {
                 if (![application isEqualToString:@"Safari"]) {
-                    [keyUtil simulateKey:@"T" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"T" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 } else {
-                    [keyUtil simulateKey:@"Z" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"Z" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 }
             } else if ([command isEqualToString:@"Close / Close Tab"]) {
                 CFTypeRef tmpRef = nil;
                 if (device != CHARRECOGNITION)
                     tmpRef = activateWindowAtPosition(x, y);
-                [keyUtil simulateKey:@"W" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"W" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Quit"]) {
                 //if the user's using VMware/RDC, should we send cmd+q or alt+f4 ?
@@ -734,7 +767,7 @@ static void doCommand(NSString *gesture, int device) {
                     CFTypeRef tmpRef = nil;
                     if (device != CHARRECOGNITION)
                         tmpRef = activateWindowAtPosition(x, y);
-                    [keyUtil simulateKey:@"Q" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"Q" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                     CFSafeRelease(tmpRef);
                 } else {
                     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -748,7 +781,7 @@ static void doCommand(NSString *gesture, int device) {
                 CFTypeRef tmpRef = nil;
                 if (device != CHARRECOGNITION)
                     tmpRef = activateWindowAtPosition(x, y);
-                [keyUtil simulateKey:@"H" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"H" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Minimize"]) {
                 CFTypeRef tmpRef = nil;
@@ -779,17 +812,17 @@ static void doCommand(NSString *gesture, int device) {
                 maximizeWindow(tmpRef, 3);
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Copy"]) {
-                [keyUtil simulateKey:@"C" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"C" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Paste"]) {
-                [keyUtil simulateKey:@"V" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"V" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"New"]) {
-                [keyUtil simulateKey:@"N" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"N" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"New Tab"]) {
-                [keyUtil simulateKey:@"T" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"T" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Open"]) {
-                [keyUtil simulateKey:@"O" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"O" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Save"]) {
-                [keyUtil simulateKey:@"S" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                [keyUtil simulateKey:@"S" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
             } else if ([command isEqualToString:@"Launch Finder"]) {
                 NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
                 [[NSWorkspace sharedWorkspace] launchApplication:@"Finder"];
@@ -876,10 +909,10 @@ static void doCommand(NSString *gesture, int device) {
                 if (device != CHARRECOGNITION)
                     tmpRef = activateWindowAtPosition(x, y);
                 if ([application isEqualToString:@"Mail"]) {
-                    [keyUtil simulateKey:@"N" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"N" ShftDown:YES CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 } else if ([application isEqualToString:@"Preview"] || [application isEqualToString:@"iChat"]) {
                 } else {
-                    [keyUtil simulateKey:@"R" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"R" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 }
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Scroll to Top"]) {
@@ -887,18 +920,18 @@ static void doCommand(NSString *gesture, int device) {
                 if (device != CHARRECOGNITION)
                     tmpRef = activateWindowAtPosition(x, y);
                 if ([application isEqualToString:@"Microsoft Word"])
-                    [keyUtil simulateKey:@"Home" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"Home" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 else
-                    [keyUtil simulateKey:@"Home" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:NO];
+                    [keyUtil simulateKey:@"Home" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:NO FnDown:NO];
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Scroll to Bottom"]) {
                 CFTypeRef tmpRef = nil;
                 if (device != CHARRECOGNITION)
                     tmpRef = activateWindowAtPosition(x, y);
                 if ([application isEqualToString:@"Microsoft Word"])
-                    [keyUtil simulateKey:@"End" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES];
+                    [keyUtil simulateKey:@"End" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:YES FnDown:NO];
                 else
-                    [keyUtil simulateKey:@"End" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:NO];
+                    [keyUtil simulateKey:@"End" ShftDown:NO CtrlDown:NO AltDown:NO CmdDown:NO FnDown:NO];
                 CFSafeRelease(tmpRef);
             } else if ([command isEqualToString:@"Application Switcher"]) {
                 CoreDockSendNotification(@"com.apple.appswitcher.awake");
@@ -964,7 +997,7 @@ static void doCommand(NSString *gesture, int device) {
                             ShftDown:(modifierFlags & kCGEventFlagMaskShift) != 0
                             CtrlDown:(modifierFlags & kCGEventFlagMaskControl) != 0
                              AltDown:(modifierFlags & kCGEventFlagMaskAlternate) != 0
-                             CmdDown:(modifierFlags & kCGEventFlagMaskCommand) != 0];
+                             CmdDown:(modifierFlags & kCGEventFlagMaskCommand) != 0 FnDown:NO];
             CFSafeRelease(tmpRef);
 
         }

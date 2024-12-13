@@ -52,7 +52,7 @@ static void languageChanged(CFNotificationCenterRef center, void *observer, CFSt
     return self;
 }
 
-- (void)simulateKeyCode:(CGKeyCode)code ShftDown:(BOOL)shft CtrlDown:(BOOL)ctrl AltDown:(BOOL)alt CmdDown:(BOOL)cmd {
+- (void)simulateKeyCode:(CGKeyCode)code ShftDown:(BOOL)shft CtrlDown:(BOOL)ctrl AltDown:(BOOL)alt CmdDown:(BOOL)cmd FnDown:(BOOL)fn {
 
      if (shft)
      CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)56, true);
@@ -62,7 +62,9 @@ static void languageChanged(CFNotificationCenterRef center, void *observer, CFSt
      CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)58, true);
      if (cmd)
      CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)55, true);
-
+     if(fn)
+     CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)63, true);
+    
      CGPostKeyboardEvent((CGCharCode)0, a[code], true);
      CGPostKeyboardEvent((CGCharCode)0, a[code], false);
 
@@ -74,12 +76,14 @@ static void languageChanged(CFNotificationCenterRef center, void *observer, CFSt
      CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)58, false);
      if (cmd)
      CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)55, false);
-
+     if(fn)
+     CGPostKeyboardEvent((CGCharCode)0, (CGKeyCode)63, false);
+   
 }
 
-- (void) simulateKey:(NSString *)key ShftDown:(BOOL)shft CtrlDown:(BOOL)ctrl AltDown:(BOOL)alt CmdDown:(BOOL)cmd {
+- (void) simulateKey:(NSString *)key ShftDown:(BOOL)shft CtrlDown:(BOOL)ctrl AltDown:(BOOL)alt CmdDown:(BOOL)cmd FnDown:(BOOL)fn {
     CGKeyCode km = [(NSNumber *)[keyMap objectForKey:key] unsignedIntValue];
-    [self simulateKeyCode:km ShftDown:shft CtrlDown:ctrl AltDown:alt CmdDown:cmd];
+    [self simulateKeyCode:km ShftDown:shft CtrlDown:ctrl AltDown:alt CmdDown:cmd FnDown:fn];
 }
 
 - (void)simulateSpecialKey:(int)key {
